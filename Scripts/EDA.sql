@@ -123,3 +123,78 @@ SELECT *
 FROM country_year_ranking
 WHERE ranking <=5
 ;
+
+SELECT company, MAX(funds_raised_millions) AS max_funds, SUM(total_laid_off) as total_layoff
+FROM layoffs_staging3
+WHERE total_laid_off is NOT NULL 
+GROUP BY company
+ORDER BY max_funds DESC
+;
+
+-- Top 10 Capital-Backed Companies vs. Total Layoffs
+SELECT 
+    company, 
+    MAX(funds_raised_millions) AS total_funding_millions, 
+    SUM(total_laid_off) AS total_layoffs
+FROM layoffs_staging2
+WHERE total_laid_off IS NOT NULL 
+GROUP BY company
+ORDER BY total_funding_millions DESC
+LIMIT 10;
+
+-- Capital Lost in 100% Workforce Liquidationss
+
+SELECT company,SUM(total_laid_off) as total_layoff,
+MAX(funds_raised_millions) as total_funds_millions
+FROM layoffs_staging3
+WHERE percentage_laid_off = 1 AND total_laid_off IS NOT NULL
+GROUP BY company,industry
+ORDER BY total_funds_millions DESC 
+;
+
+
+SELECT company, stage, sum(total_laid_off) as total_layoffs
+FROM layoffs_staging3
+WHERE total_laid_off IS NOT NULL
+GROUP BY company, stage
+ORDER BY company asc;
+
+SELECT company, stage,`date`
+from layoffs_staging3
+WHERE stage != 'unknown'
+ORDER BY company ASC;
+
+-- company layoffs at different stages
+SELECT company ,stage, SUM(total_laid_off) as total_layoff
+FROM layoffs_staging3
+WHERE total_laid_off IS NOT NULL
+GROUP BY company, stage
+ORDER BY company ASC;
+
+-- total layoffs at different  stages
+
+SELECT stage , SUM(total_laid_off) as total_layoff
+FROM layoffs_staging3
+WHERE stage IS NOT NULL
+GROUP BY stage
+ORDER BY total_layoff DESC;
+
+SELECT stage , AVG(total_laid_off) as Avg_layoff
+FROM layoffs_staging3
+WHERE stage IS NOT NULL 
+GROUP BY stage
+ORDER BY Avg_layoff Desc;
+
+-- Average Layoff Scale & Intensity by Stage
+SELECT stage , AVG(CAST(percentage_laid_off AS DECIMAL(10,2)))as avg_percentage_layoff
+FROM layoffs_staging3
+WHERE stage IS NOT NULL 
+GROUP BY stage
+ORDER BY avg_percentage_layoff DESC;
+
+-- Year-over-Year Stage Progression
+SELECT  year(`date`) as years, stage , sum(total_laid_off) as total_layoff
+FROM layoffs_staging3
+WHERE stage IS NOT NULL 
+GROUP BY years , stage
+ORDER BY stage ASC ,years;
